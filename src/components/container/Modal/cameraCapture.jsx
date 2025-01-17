@@ -8,17 +8,8 @@ const CameraCapture = () => {
   const [barcode, setBarcode] = useAtom(sBarcode);
   const [barcodeModal, setShowBarcodeModal] = useAtom(barcodeModalState);
   const [cameraModal, setShowCameraModal] = useAtom(cameraModalState);
-  const [allowedCamera, setAllowedCamera] = useAtom(sCameraAllowed)
-
-  useEffect(()=>{
-    navigator.getUserMedia({video:true}, function(stream) {
-      stream.getTracks().forEach(x=>x.stop());
-    }, err=>console.log(setAllowedCamera(false)));
-  },[])
-
 
   useEffect(() => {
-    if(allowedCamera){
       const video = videoElementRef.current;
       const qrScanner = new QrScanner(
         video,
@@ -42,19 +33,16 @@ const CameraCapture = () => {
         qrScanner.stop();
         qrScanner.destroy();
       };
-    }
-  }, [allowedCamera]);
+  }, []);
 
   return (
     <div>
       <div className="videoWrapper position-relative" style={{ width: '270px', height: '300px' }}>
-        {!allowedCamera ? ("Camera is not allowed") :
         <video className="qrVideo" 
                 ref={videoElementRef} 
                 style={{ objectFit: 'cover',  // video covers the area
                     width: '100%',       // full width
                     height: '100%',  }}/>
-                }
       </div>
     </div>
   );
