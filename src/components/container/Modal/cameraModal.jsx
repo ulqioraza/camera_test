@@ -27,7 +27,7 @@ function CameraModal() {
 
 
   const videoConstraints = {
-            facingMode: "user"
+            facingMode: "environment"
     };
   const webcamRef = React.useRef(null);
 
