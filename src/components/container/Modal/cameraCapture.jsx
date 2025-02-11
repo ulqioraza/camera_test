@@ -10,29 +10,50 @@ const CameraCapture = () => {
   const [cameraModal, setShowCameraModal] = useAtom(cameraModalState);
 
   useEffect(() => {
-      const video = videoElementRef.current;
-      const qrScanner = new QrScanner(
-        video,
-        (result) => {
-          console.log('decoded qr code:', result);
-          setBarcode(result.data);
-          setShowBarcodeModal(false)
-          setShowCameraModal(true)
-        },
-        {
-          returnDetailedScanResult: true,
-          highlightScanRegion: true,
-          highlightCodeOutline: true,
-        }
-      );
-      qrScanner.start();
-      console.log('start');
+    const video = videoElementRef.current;
 
-      return () => {
-        console.log(qrScanner);
-        qrScanner.stop();
-        qrScanner.destroy();
-      };
+    // High-resolution video constraints
+    const videoConstraints = {
+      width: { ideal: 1920 },  
+      height: { ideal: 1080 },
+      facingMode: "environment"
+    };
+
+    QrScanner.hasCamera().then(hasCamera => {
+      if (hasCamera) {
+        const qrScanner = new QrScanner(
+          video,
+          (result) => {
+            console.log('decoded qr code:', result);
+            setBarcode(result.data);
+            setShowBarcodeModal(false);
+            setShowCameraModal(true);
+          },
+          {
+            returnDetailedScanResult: true,
+            highlightScanRegion: true,
+            highlightCodeOutline: true,
+            maxScansPerSecond: 10, 
+            preferredCamera: "environment", 
+          }
+        );
+
+        qrScanner.start()
+          .then(() => {
+            // Apply high-resolution constraints
+            if (video.srcObject) {
+              const [track] = video.srcObject.getVideoTracks();
+              track.applyConstraints(videoConstraints);
+            }
+          });
+
+        return () => {
+          qrScanner.stop();
+          qrScanner.destroy();
+        };
+      }
+    });
+
   }, []);
 
   return (
@@ -40,7 +61,7 @@ const CameraCapture = () => {
       <div className="videoWrapper position-relative" style={{ width: '270px', height: '300px' }}>
         <video className="qrVideo" 
                 ref={videoElementRef} 
-                style={{ objectFit: 'cover',  // video covers the area
+                style={{ objectFit: 'contains',  // video covers the area
                     width: '100%',       // full width
                     height: '100%',  }}/>
       </div>
