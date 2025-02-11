@@ -27,6 +27,8 @@ function CameraModal() {
 
 
   const videoConstraints = {
+            width: 1920,
+            height: 1080,
             facingMode: "environment"
     };
   const webcamRef = React.useRef(null);
@@ -95,7 +97,7 @@ function CameraModal() {
               <Webcam
                   audio={false}
                   ref={webcamRef}
-                  screenshotFormat="image/jpeg"
+                  screenshotFormat="image/png"
                   style={{ width: "100%", height: "78vh",  objectFit: "cover",}}
                   videoConstraints={videoConstraints}
               />
