@@ -27,8 +27,8 @@ function CameraModal() {
 
 
   const videoConstraints = {
-            //width: 1920,
-            //height: 1080,
+            width: 1080,
+            height: 800,
             facingMode: "environment",
             screenshotQuality: 1
     };
