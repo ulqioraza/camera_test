@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { Modal, Button } from 'react-bootstrap';
 import { cameraModalState, sBarcode, sPartType, sUserName } from '../../../constants/jotai_state';
 import Webcam from 'react-webcam';
+import {Camera} from 'react-camera-pro';
 import { BsX } from 'react-icons/bs';
 import { copSetSaveImages} from '../../../services/api/api'
 import Swal from 'sweetalert2';
@@ -15,6 +16,7 @@ function CameraModal() {
   const [barcode, setBarcode] = useAtom(sBarcode)
   const [usenameDefault, setUsenameDefault] = useAtom(sUserName)
   const [cameraToggle, setCameraToggle] = useState(true)
+  const [loading, setLoading] = useState(false);
 
   const handleClose = async () => {
     setShow(false)
@@ -27,17 +29,17 @@ function CameraModal() {
 
 
   const videoConstraints = {
-            width: 1080,
-            height: 800,
+            //width: 1080,
+            //height: 800,
             facingMode: "environment",
             screenshotQuality: 1
     };
   const webcamRef = React.useRef(null);
 
   const capture = () => {
-          const screenshot = webcamRef.current.getScreenshot();
-          const pngScreenshot = screenshot.replace(/^data:image\/jpeg/, 'data:image/png');
-          imageSrc.push(pngScreenshot)
+          const screenshot = webcamRef.current.takePhoto();
+          //const pngScreenshot = screenshot.replace(/^data:image\/jpeg/, 'data:image/png');
+          imageSrc.push(screenshot)
           
           setImageSrc([...imageSrc])
           console.log(imageSrc)
@@ -60,14 +62,56 @@ function CameraModal() {
       await setImageSrc([...imageSrc])
       console.log(imageSrc)
   }
+  useEffect(() => {
+      if (webcamRef.current) {
+          const videoTrack = webcamRef.current.getVideoTracks?.()[0];
+          if (videoTrack && videoTrack.getCapabilities) {
+              const capabilities = videoTrack.getCapabilities();
+              if (capabilities.focusMode) {
+                  videoTrack.applyConstraints({
+                      advanced: [{ focusMode: "continuous" }]
+                  });
+              }
+          }
+      }
+  }, []);
 
   const copSaveImages = async() => {
+    setLoading(true);
     copSetSaveImages({ userId: usenameDefault, partType: partType, barcode: barcode, imgPath:imageSrc})
           .then((result) => { 
-            if(result.result == false){Swal.fire('Error', result.msg, 'error')}
-            else{ Swal.fire('Success', result.msg, 'success');}
+            setLoading(false);
+            if(result.result == false){
+                Swal.fire({
+                  title: 'Error',
+                  text: result.msg,
+                  icon: 'error',
+                  confirmButtonColor: '#3085d6',
+                  cancelButtonColor: '#d33',
+                  confirmButtonText: 'Close'
+                  }).then((result) => {
+                      if (result.isConfirmed) {
+                          handleClose()
+                          document.getElementById("EditForm").submit();
+                      }
+                  })
+              }
+            else{ 
+              Swal.fire({
+                title: 'Success',
+                text: result.msg,
+                icon: 'success',
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'OK'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        handleClose()
+                        document.getElementById("EditForm").submit();
+                    }
+                })
+              }
             })
-    
   }
   
   return (
@@ -95,13 +139,20 @@ function CameraModal() {
           <div className='d-flex flex-wrap row align-items-start'>
             <div className='col-12 col-md-8'>
             {cameraToggle && (
-              <Webcam
+              <Camera 
+                    ref={webcamRef} 
+                    aspectRatio={16 / 9}
+                    screenshotFormat="image/png"
+                    style={{ width: "100%", height: "78vh",  objectFit: "contain",}}
+                    facingMode='environment' 
+                    />
+              /*<Webcam
                   audio={false}
                   ref={webcamRef}
                   screenshotFormat="image/png"
-                  style={{ width: "100%", height: "78vh",  objectFit: "cover",}}
+                  style={{ width: "100%", height: "78vh",  objectFit: "contain",}}
                   videoConstraints={videoConstraints}
-              />
+              />*/
             )}
             </div>
             <div className="col-12 col-md-4">
@@ -139,9 +190,17 @@ function CameraModal() {
             <Button variant="secondary" onClick={handleClose}>
               Close
             </Button>
-            <Button variant="primary" onClick={copSaveImages}>
-              Save Changes
-            </Button>
+             {loading ?
+                <Button variant="primary" onClick={copSaveImages} disabled>
+                  <div className='d-flex gap-2'>
+                    <div className="spinner"></div> Loading
+                  </div> 
+                </Button>
+                :
+                <Button variant="primary" onClick={copSaveImages}>
+                  Save Changes
+                </Button>
+              }
           </div>
         </Modal.Footer>
         
