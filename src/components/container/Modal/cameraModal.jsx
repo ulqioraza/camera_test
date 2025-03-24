@@ -27,9 +27,10 @@ function CameraModal() {
 
 
   const videoConstraints = {
-            width: 1920,
-            height: 1080,
-            facingMode: "environment"
+            //width: 1920,
+            //height: 1080,
+            facingMode: "environment",
+            screenshotQuality: 1
     };
   const webcamRef = React.useRef(null);
 
