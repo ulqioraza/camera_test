@@ -142,7 +142,7 @@ function CameraModal() {
               <div style={{ width: "100%", height: "300px", display: "flex", flexDirection: "column", alignItems: "center" }}>
               <Camera 
                     ref={webcamRef} 
-                    aspectRatio={16 / 10}
+                    aspectRatio={16 / 9}
                     screenshotFormat="image/png"
                     style={{ width: "640px", height: "480px", objectFit: "contain" }}
                     facingMode='environment' 
