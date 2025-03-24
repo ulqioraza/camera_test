@@ -139,10 +139,10 @@ function CameraModal() {
           <div className='d-flex flex-wrap row align-items-start'>
             <div className='col-12 col-md-8'>
             {cameraToggle && (
-              <div style={{ width: "100%", height: "800px", display: "flex", flexDirection: "column", alignItems: "center" }}>
+              <div style={{ width: "100%", height: "300px", display: "flex", flexDirection: "column", alignItems: "center" }}>
               <Camera 
                     ref={webcamRef} 
-                    //aspectRatio={16 / 9}
+                    aspectRatio={4 / 3}
                     screenshotFormat="image/png"
                     style={{ width: "640px", height: "480px", objectFit: "contain" }}
                     facingMode='environment' 
